@@ -1,26 +1,24 @@
-#include <stdio.h>
-#include <stdlib.h> // malloc, free
+#include <stdio.h> // FILE
 #include <unistd.h> // write
-#include <math.h>	// powf, sqrtf	
-
-# define FAIL 1
+#include <stdlib.h> // malloc, free
+#include <math.h> // powf, sqrtf
 
 typedef struct s_back
 {
 	int		width;
 	int		height;
-	char	symbol; // what kinda background
+	char	symbol;
 	char	*back;
 }	t_back;
 
 typedef struct s_circle
 {
-	char	circle; // ?
+	char	circle;
 	float	x;
 	float	y;
-	float	r; // ?
+	float	r;
 	char	symbol;
-}			t_circle;
+}	t_circle;
 
 static int	ft_back(FILE *fp, t_back *back)
 {
@@ -29,13 +27,13 @@ static int	ft_back(FILE *fp, t_back *back)
 
 	count = fscanf(fp, "%d %d %c\n", &back->width, &back->height, &back->symbol);
 	if (count != 3)
-		return (FAIL);
+		return (1);
 	if (back->width <= 0 || back->width > 300 \
-			|| back->height <= 0 || back->height > 300)
-		return (FAIL);
-	back->back = (char *)malloc(sizeof(char) * back->width * back->height + 1); // \0 causes + 1
+	|| back->height <= 0 || back->height > 300)
+		return (1);
+	back->back = (char *)malloc(sizeof(char) * back->width * back->height + 1);
 	if (back->back == NULL)
-		return (FAIL);
+		return (1);
 	i = 0;
 	while (i < back->width * back->height)
 	{
@@ -54,7 +52,7 @@ static int	ft_check(t_circle *circle, float x, float y)
 	if (dist <= circle->r)
 	{
 		if (circle->r - dist < 1)
-			return (2); // ? 
+			return (2);
 		return (0);
 	}
 	return (1);
@@ -67,7 +65,7 @@ static void	ft_get_draw(t_back *back, t_circle *circle)
 	int	ret;
 
 	i = 0;
-	while(i < back->width)
+	while (i < back->height)
 	{
 		j = 0;
 		while (j < back->width)
@@ -86,15 +84,15 @@ static int	ft_circle(FILE *fp, t_back *back)
 	int			count;
 	t_circle	circle;
 
-	count = fscanf(fp, "%c %f %f %f %c\n",
-			&circle.circle, &circle.x, &circle.y, &circle.r, &circle.symbol);
+	count = fscanf(fp, "%c %f %f %f %c\n", \
+	&circle.circle, &circle.x, &circle.y, &circle.r, &circle.symbol);
 	while (count == 5)
 	{
 		if (circle.r <= 0 || (circle.circle != 'c' && circle.circle != 'C'))
-			return (FAIL);
+			return (1);
 		ft_get_draw(back, &circle);
-		count = fscanf(fp, "%c %f %f %f %c\n", 
-				&circle.circle, &circle.x, &circle.y, &circle.r, &circle.symbol);
+		count = fscanf(fp, "%c %f %f %f %c\n", \
+		&circle.circle, &circle.x, &circle.y, &circle.r, &circle.symbol);
 	}
 	if (count != -1)
 		return (1);
@@ -107,11 +105,11 @@ static int	mini_paint(FILE *fp, t_back *back, char *filename)
 
 	fp = fopen(filename, "r");
 	if (fp == NULL)
-		return (FAIL);
-	if (ft_back(fp, back) == FAIL)
-		return (FAIL);
-	if (ft_circle(fp, back) == FAIL)
-		return (FAIL);
+		return (1);
+	if (ft_back(fp, back) == 1)
+		return (1);
+	if (ft_circle(fp, back) == 1)
+		return (1);
 	i = 0;
 	while (back->back[i] != '\0')
 	{
@@ -122,17 +120,17 @@ static int	mini_paint(FILE *fp, t_back *back, char *filename)
 	return (0);
 }
 
-int	main(int ac, char **av)
+int	main(int argc, char **argv)
 {
 	FILE	*fp;
 	t_back	back;
 
 	fp = NULL;
-	if (ac == 2)
+	if (argc == 2)
 	{
-		if (mini_paint(fp, &back, av[1]) == FAIL)
+		if (mini_paint(fp, &back, argv[1]) == 1)
 		{
-			write(1, "Error : Operation file corrupted\n", 32);
+			write(1, "Error: Operation file corrupted\n", 32);
 			free(back.back);
 			fclose(fp);
 			return (1);
@@ -140,16 +138,10 @@ int	main(int ac, char **av)
 	}
 	else
 	{
-		write(1, "Error : argument\n", 16);
+		write(1, "Error: argument\n", 16);
 		return (1);
 	}
-
 	free(back.back);
 	fclose(fp);
 	return (0);
 }
-
-/* receive filename as argument
-* open the file
-* 
-*/
